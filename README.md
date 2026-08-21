@@ -135,7 +135,22 @@ mvn test
 
 覆盖 Base62 编解码往返、URL 合法性/黑名单、发号器单调唯一性/并发唯一性/跨号段。
 
-## 七、部署形态与后续规划
+## 七、日志配置
+
+`short-link-server/src/main/resources/logback-spring.xml`：
+
+- **控制台**：Spring Boot 彩色格式，供 `docker logs` / `kubectl logs` 采集
+- **主日志** `logs/short-link-server.log`：INFO 及以上，按天 + 100MB 滚动，
+  gzip 压缩，保留 30 天 / 总量 2GB
+- **错误日志** `logs/short-link-server-error.log`：仅 ERROR，独立滚动，便于告警检索
+- **异步写入**：文件输出经 AsyncAppender，`neverBlock=true`，队列满丢弃日志
+  而不阻塞跳转热路径
+- **级别**：dev profile（默认）下 `com.shortlink` 为 DEBUG（含 MyBatis SQL）；
+  生产以 `SPRING_PROFILES_ACTIVE=prod` 启动时为 INFO；ShardingSphere/Hikari/
+  Redisson 等三方组件统一降噪至 WARN
+- **目录**：默认 `./logs`，可用环境变量 `LOG_HOME` 覆盖（如挂载数据卷）
+
+## 八、部署形态与后续规划
 
 当前为**模块化单体**（一个可执行 jar），生产可按设计文档演进：
 

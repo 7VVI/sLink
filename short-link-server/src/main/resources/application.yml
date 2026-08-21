@@ -4,6 +4,9 @@ server:
 spring:
   application:
     name: short-link-server
+  # 默认 dev（业务 DEBUG + SQL 日志）；生产环境用 SPRING_PROFILES_ACTIVE=prod 覆盖
+  profiles:
+    active: dev
   datasource:
     # ShardingSphere-JDBC 驱动模式：分片规则见 classpath:sharding.yaml
     driver-class-name: org.apache.shardingsphere.driver.ShardingSphereDriver
@@ -77,8 +80,3 @@ shortlink:
   rate-limit:
     enabled: true
     per-ip-qps: 100
-
-logging:
-  level:
-    root: info
-    com.shortlink: debug

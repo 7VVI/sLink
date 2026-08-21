@@ -10,7 +10,7 @@ CREATE DATABASE IF NOT EXISTS short_link_ds2 DEFAULT CHARACTER SET utf8mb4 COLLA
 CREATE DATABASE IF NOT EXISTS short_link_ds3 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- ---------------------------------------------------------------------------
--- 主库：用户 / 发号器 / 统计归档
+-- 主库：用户 / 分组 / 域名 / 发号器 / 统计归档
 -- ---------------------------------------------------------------------------
 USE short_link_main;
 
@@ -26,6 +26,28 @@ CREATE TABLE IF NOT EXISTS sys_user (
     PRIMARY KEY (id),
     UNIQUE KEY uk_username (username)
 ) ENGINE = InnoDB COMMENT '系统用户';
+
+CREATE TABLE IF NOT EXISTS link_group (
+    id          BIGINT       NOT NULL COMMENT '雪花ID',
+    user_id     BIGINT       NOT NULL COMMENT '所属用户',
+    name        VARCHAR(32)  NOT NULL COMMENT '分组名',
+    create_time DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_user_name (user_id, name)
+) ENGINE = InnoDB COMMENT '短链分组';
+
+CREATE TABLE IF NOT EXISTS surl_domain (
+    id          BIGINT       NOT NULL COMMENT '雪花ID',
+    domain      VARCHAR(255) NOT NULL COMMENT '域名前缀（含协议，不带路径）',
+    name        VARCHAR(64)  NULL COMMENT '备注名',
+    is_default  TINYINT      NOT NULL DEFAULT 0 COMMENT '1-默认域名',
+    status      TINYINT      NOT NULL DEFAULT 1 COMMENT '1-启用 0-停用',
+    create_time DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_domain (domain)
+) ENGINE = InnoDB COMMENT '短链域名';
 
 CREATE TABLE IF NOT EXISTS leaf_alloc (
     biz_tag     VARCHAR(128) NOT NULL COMMENT '发号业务标签',
@@ -65,8 +87,11 @@ BEGIN
                 '  long_url    VARCHAR(2048) NOT NULL COMMENT ''长链接'',',
                 '  title       VARCHAR(128)  NULL COMMENT ''标题'',',
                 '  user_id     BIGINT        NOT NULL COMMENT ''创建人'',',
+                '  group_id    BIGINT        NOT NULL DEFAULT 0 COMMENT ''分组ID（0=未分组）'',',
+                '  domain_id   BIGINT        NOT NULL DEFAULT 0 COMMENT ''域名ID（0=系统默认）'',',
                 '  expire_time DATETIME      NULL COMMENT ''过期时间'',',
-                '  status      TINYINT       NOT NULL DEFAULT 1 COMMENT ''1-正常 0-下线 2-删除'',',
+                '  status      TINYINT       NOT NULL DEFAULT 1 COMMENT ''1-正常 0-下线 2-回收站'',',
+                '  delete_time DATETIME      NULL COMMENT ''移入回收站时间'',',
                 '  create_time DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,',
                 '  update_time DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,',
                 '  PRIMARY KEY (id),',

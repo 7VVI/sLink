@@ -11,6 +11,10 @@ public record ShortLinkVO(
         String longUrl,
         String title,
         Integer status,
+        Long groupId,
+        String groupName,
+        Long domainId,
+        String domain,
         LocalDateTime expireTime,
         LocalDateTime createTime
 ) {

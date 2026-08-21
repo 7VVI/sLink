@@ -80,3 +80,8 @@ shortlink:
   rate-limit:
     enabled: true
     per-ip-qps: 100
+  # 回收站：删除的短链保留 30 天，每天 03:30 自动物理清除
+  recycle-bin:
+    retention-days: 30
+    purge-cron: "0 30 3 * * ?"
+    purge-batch-size: 500

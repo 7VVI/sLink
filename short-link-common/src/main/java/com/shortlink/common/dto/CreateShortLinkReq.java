@@ -19,6 +19,12 @@ public record CreateShortLinkReq(
 
         @Min(value = 1, message = "有效期天数至少为 1")
         @Max(value = 3650, message = "有效期天数不能超过 3650")
-        Integer expireDays
+        Integer expireDays,
+
+        @Min(value = 0, message = "groupId 不合法")
+        Long groupId,
+
+        @Min(value = 0, message = "domainId 不合法")
+        Long domainId
 ) {
 }

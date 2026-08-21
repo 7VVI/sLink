@@ -29,6 +29,8 @@ public class ShortLinkProperties {
 
     private final RateLimit rateLimit = new RateLimit();
 
+    private final RecycleBin recycleBin = new RecycleBin();
+
     public String getDomain() {
         return domain;
     }
@@ -59,6 +61,10 @@ public class ShortLinkProperties {
 
     public RateLimit getRateLimit() {
         return rateLimit;
+    }
+
+    public RecycleBin getRecycleBin() {
+        return recycleBin;
     }
 
     /**
@@ -315,6 +321,51 @@ public class ShortLinkProperties {
 
         public void setPerIpQps(long perIpQps) {
             this.perIpQps = perIpQps;
+        }
+    }
+
+    /**
+     * 回收站配置。
+     */
+    public static class RecycleBin {
+
+        /**
+         * 回收站保留天数，到期自动物理清除。
+         */
+        private int retentionDays = 30;
+
+        /**
+         * 自动清除任务的 cron 表达式（默认每天 03:30）。
+         */
+        private String purgeCron = "0 30 3 * * ?";
+
+        /**
+         * 自动清除每批处理的短链数。
+         */
+        private int purgeBatchSize = 500;
+
+        public int getRetentionDays() {
+            return retentionDays;
+        }
+
+        public void setRetentionDays(int retentionDays) {
+            this.retentionDays = retentionDays;
+        }
+
+        public String getPurgeCron() {
+            return purgeCron;
+        }
+
+        public void setPurgeCron(String purgeCron) {
+            this.purgeCron = purgeCron;
+        }
+
+        public int getPurgeBatchSize() {
+            return purgeBatchSize;
+        }
+
+        public void setPurgeBatchSize(int purgeBatchSize) {
+            this.purgeBatchSize = purgeBatchSize;
         }
     }
 }

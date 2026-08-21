@@ -3,6 +3,7 @@ package com.shortlink.server.controller;
 import cn.dev33.satoken.stp.StpUtil;
 import com.shortlink.common.constant.ShortLinkConstants;
 import com.shortlink.common.dto.CreateShortLinkReq;
+import com.shortlink.common.dto.MoveGroupReq;
 import com.shortlink.common.dto.ShortLinkDetailVO;
 import com.shortlink.common.dto.ShortLinkVO;
 import com.shortlink.common.dto.UpdateStatusReq;
@@ -43,7 +44,7 @@ public class ShortLinkController {
         this.shortLinkService = shortLinkService;
     }
 
-    @Operation(summary = "创建短链")
+    @Operation(summary = "创建短链（可指定分组与域名）")
     @PostMapping
     public Mono<Result<ShortLinkVO>> create(@Valid @RequestBody CreateShortLinkReq request,
                                             ServerWebExchange exchange) {
@@ -51,14 +52,15 @@ public class ShortLinkController {
         return shortLinkService.create(request, userId).map(Result::ok);
     }
 
-    @Operation(summary = "我的短链分页列表")
+    @Operation(summary = "我的短链分页列表（可按分组过滤，groupId=0 查未分组）")
     @GetMapping
     public Mono<Result<PageResult<ShortLinkVO>>> page(
             @RequestParam(defaultValue = "1") @Min(1) long pageNo,
             @RequestParam(defaultValue = "10") @Min(1) @Max(100) long pageSize,
+            @RequestParam(required = false) @Min(0) Long groupId,
             ServerWebExchange exchange) {
         long userId = SaTokenReactorContext.using(exchange, StpUtil::getLoginIdAsLong);
-        return shortLinkService.pageByUser(userId, pageNo, pageSize).map(Result::ok);
+        return shortLinkService.pageByUser(userId, pageNo, pageSize, groupId).map(Result::ok);
     }
 
     @Operation(summary = "短链详情（含实时统计）")
@@ -68,6 +70,18 @@ public class ShortLinkController {
         boolean admin = SaTokenReactorContext.using(exchange,
                 () -> StpUtil.hasRole(ShortLinkConstants.ROLE_ADMIN));
         return shortLinkService.detail(code, userId, admin).map(Result::ok);
+    }
+
+    @Operation(summary = "移动短链到分组（groupId=0 移回未分组）")
+    @PutMapping("/{code}/group")
+    public Mono<Result<Void>> moveGroup(@PathVariable("code") String code,
+                                        @Valid @RequestBody MoveGroupReq request,
+                                        ServerWebExchange exchange) {
+        long userId = SaTokenReactorContext.using(exchange, StpUtil::getLoginIdAsLong);
+        boolean admin = SaTokenReactorContext.using(exchange,
+                () -> StpUtil.hasRole(ShortLinkConstants.ROLE_ADMIN));
+        return shortLinkService.moveGroup(code, request.groupId(), userId, admin)
+                .map(v -> Result.ok());
     }
 
     @Operation(summary = "上线/下线短链（下线秒级生效）")
@@ -82,7 +96,7 @@ public class ShortLinkController {
                 .map(v -> Result.ok());
     }
 
-    @Operation(summary = "删除短链（逻辑删除）")
+    @Operation(summary = "删除短链（移入回收站，默认保留 30 天）")
     @DeleteMapping("/{code}")
     public Mono<Result<Void>> remove(@PathVariable("code") String code, ServerWebExchange exchange) {
         long userId = SaTokenReactorContext.using(exchange, StpUtil::getLoginIdAsLong);

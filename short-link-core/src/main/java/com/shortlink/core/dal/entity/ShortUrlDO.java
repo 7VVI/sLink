@@ -35,14 +35,29 @@ public class ShortUrlDO implements Serializable {
     private Long userId;
 
     /**
+     * 分组 ID，0 表示未分组。
+     */
+    private Long groupId;
+
+    /**
+     * 域名 ID，0 表示系统默认域名。
+     */
+    private Long domainId;
+
+    /**
      * 过期时间，null 表示永不过期。
      */
     private LocalDateTime expireTime;
 
     /**
-     * 1-正常 0-下线 2-删除。
+     * 1-正常 0-下线 2-回收站。
      */
     private Integer status;
+
+    /**
+     * 移入回收站时间，回收站自动清理的依据。
+     */
+    private LocalDateTime deleteTime;
 
     private LocalDateTime createTime;
 
@@ -86,6 +101,30 @@ public class ShortUrlDO implements Serializable {
 
     public void setUserId(Long userId) {
         this.userId = userId;
+    }
+
+    public Long getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(Long groupId) {
+        this.groupId = groupId;
+    }
+
+    public Long getDomainId() {
+        return domainId;
+    }
+
+    public void setDomainId(Long domainId) {
+        this.domainId = domainId;
+    }
+
+    public LocalDateTime getDeleteTime() {
+        return deleteTime;
+    }
+
+    public void setDeleteTime(LocalDateTime deleteTime) {
+        this.deleteTime = deleteTime;
     }
 
     public LocalDateTime getExpireTime() {

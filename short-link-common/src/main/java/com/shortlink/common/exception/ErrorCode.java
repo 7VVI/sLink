@@ -25,6 +25,20 @@ public enum ErrorCode {
 
     LOGIN_FAILED(42002, "用户名或密码错误", 400),
 
+    GROUP_NOT_FOUND(43001, "分组不存在", 404),
+
+    GROUP_NAME_EXISTS(43002, "分组名已存在", 400),
+
+    DOMAIN_INVALID(43003, "域名不合法，需为 http/https 前缀且不含路径", 400),
+
+    DOMAIN_NOT_FOUND(43004, "域名不存在或已停用", 404),
+
+    DOMAIN_EXISTS(43005, "域名已存在", 400),
+
+    DOMAIN_IS_DEFAULT(43006, "默认域名不允许删除或停用", 400),
+
+    LINK_NOT_IN_RECYCLE(44001, "短链不在回收站中", 400),
+
     SYSTEM_ERROR(50000, "系统内部错误", 500),
 
     ID_GENERATOR_BUSY(50001, "发号器繁忙，请稍后重试", 503);

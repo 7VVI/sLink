@@ -49,4 +49,26 @@ class UrlValidatorTest {
         String longUrl = "https://example.com/" + "a".repeat(2100);
         assertThrows(BizException.class, () -> UrlValidator.requireValid(longUrl, blacklist));
     }
+
+    @Test
+    void shouldAcceptValidDomainPrefix() {
+        assertDoesNotThrow(() -> UrlValidator.requireValidDomainPrefix("https://s.cn"));
+        assertDoesNotThrow(() -> UrlValidator.requireValidDomainPrefix("http://localhost:8080"));
+        assertDoesNotThrow(() -> UrlValidator.requireValidDomainPrefix("https://s.cn/"));
+    }
+
+    @Test
+    void shouldRejectInvalidDomainPrefix() {
+        assertEquals(ErrorCode.DOMAIN_INVALID,
+                assertThrows(BizException.class,
+                        () -> UrlValidator.requireValidDomainPrefix("s.cn")).getErrorCode());
+        assertThrows(BizException.class,
+                () -> UrlValidator.requireValidDomainPrefix("https://s.cn/path"));
+        assertThrows(BizException.class,
+                () -> UrlValidator.requireValidDomainPrefix("https://s.cn?a=1"));
+        assertThrows(BizException.class,
+                () -> UrlValidator.requireValidDomainPrefix("ftp://s.cn"));
+        assertThrows(BizException.class,
+                () -> UrlValidator.requireValidDomainPrefix(" "));
+    }
 }

@@ -67,4 +67,36 @@ public final class UrlValidator {
             }
         }
     }
+
+    /**
+     * 校验短链域名前缀：仅允许 http/https 协议 + 主机名（可带端口），不允许路径/参数/锚点。
+     */
+    public static void requireValidDomainPrefix(String domain) {
+        if (domain == null || domain.isBlank()) {
+            throw new BizException(ErrorCode.DOMAIN_INVALID, "域名不能为空");
+        }
+        String trimmed = domain.trim();
+        if (trimmed.length() > 255) {
+            throw new BizException(ErrorCode.DOMAIN_INVALID, "域名长度不能超过 255");
+        }
+        URI uri;
+        try {
+            uri = URI.create(trimmed);
+        } catch (IllegalArgumentException e) {
+            throw new BizException(ErrorCode.DOMAIN_INVALID);
+        }
+        String scheme = uri.getScheme();
+        if (!"http".equalsIgnoreCase(scheme) && !"https".equalsIgnoreCase(scheme)) {
+            throw new BizException(ErrorCode.DOMAIN_INVALID, "域名需以 http:// 或 https:// 开头");
+        }
+        if (uri.getHost() == null || uri.getHost().isBlank()) {
+            throw new BizException(ErrorCode.DOMAIN_INVALID, "域名缺少主机名");
+        }
+        if (uri.getPath() != null && !uri.getPath().isBlank() && !"/".equals(uri.getPath())) {
+            throw new BizException(ErrorCode.DOMAIN_INVALID, "域名不允许携带路径");
+        }
+        if (uri.getQuery() != null || uri.getFragment() != null) {
+            throw new BizException(ErrorCode.DOMAIN_INVALID, "域名不允许携带查询参数或锚点");
+        }
+    }
 }

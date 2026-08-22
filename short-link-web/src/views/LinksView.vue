@@ -181,7 +181,7 @@ onMounted(() => {
               </td>
               <td style="max-width:230px">
                 <span
-                  style="display:inline-flex;align-items:center;gap:7px;color:var(--ink-2);font-size:12.5px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
+                  style="display:inline-flex;align-items:center;gap:7px;color:#2563EB;font-size:12.5px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
                   :title="r.title || r.longUrl"
                 >
                   <span class="fav">{{ (r.code || '?').slice(0, 1).toUpperCase() }}</span>

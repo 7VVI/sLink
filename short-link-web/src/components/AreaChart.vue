@@ -95,8 +95,8 @@ const vLabels = computed(() => {
     <svg :viewBox="`0 0 ${W} ${H}`" style="width:100%;height:auto;display:block">
       <defs>
         <linearGradient id="areaFill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stop-color="#111827" stop-opacity="0.10" />
-          <stop offset="1" stop-color="#111827" stop-opacity="0" />
+          <stop offset="0" stop-color="#0891B2" stop-opacity="0.10" />
+          <stop offset="1" stop-color="#0891B2" stop-opacity="0" />
         </linearGradient>
       </defs>
 
@@ -114,7 +114,7 @@ const vLabels = computed(() => {
       <line :x1="PAD.l" :x2="W - PAD.r" :y1="H - PAD.b" :y2="H - PAD.b" stroke="#D1D5DB" stroke-width="1" />
 
       <path :d="area" fill="url(#areaFill)" />
-      <path v-if="line" :d="line" fill="none" stroke="#111827" stroke-width="1.8" stroke-linecap="round" />
+      <path v-if="line" :d="line" fill="none" stroke="#0891B2" stroke-width="1.8" stroke-linecap="round" />
 
       <!-- 横轴时间刻度（常驻）：短刻度线 + 日期标签 -->
       <g v-for="t in xTicks" :key="'xt' + t.i">
@@ -131,7 +131,7 @@ const vLabels = computed(() => {
       </g>
 
       <!-- 常驻数据点：直接可见折线位置 -->
-      <circle v-for="(p, i) in pts" :key="'pt' + i" :cx="p.x" :cy="p.y" r="2.6" fill="#111827" stroke="#fff" stroke-width="1.2" />
+      <circle v-for="(p, i) in pts" :key="'pt' + i" :cx="p.x" :cy="p.y" r="2.6" fill="#0891B2" stroke="#fff" stroke-width="1.2" />
       <!-- 常驻数值标签 -->
       <g v-for="l in vLabels" :key="'vl' + l.i">
         <text :x="l.i === data.length - 1 ? Math.min(l.x, W - PAD.r - 2) : l.x" :y="l.y - 9" font-size="10.5"

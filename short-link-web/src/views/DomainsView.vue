@@ -162,7 +162,7 @@ onMounted(load);
         <input v-model="newName" class="input" placeholder="例如：官网主域" />
       </div>
       <label style="display:flex;align-items:center;gap:9px;font-size:13px;color:var(--ink-2);cursor:pointer">
-        <input v-model="newIsDefault" type="checkbox" style="accent-color:#111827;width:15px;height:15px" />
+        <input v-model="newIsDefault" type="checkbox" style="accent-color:var(--accent);width:15px;height:15px" />
         设为默认域名（当前默认域名将被替换）
       </label>
       <template #footer>

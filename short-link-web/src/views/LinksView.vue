@@ -180,7 +180,7 @@ onMounted(() => {
                     target="_blank"
                     rel="noreferrer"
                     class="mono"
-                    style="font-size:12.5px;font-weight:700;color:#2563EB;text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
+                    style="font-size:12.5px;font-weight:700;color:var(--accent-hover);text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
                     :title="r.shortUrl"
                     @click.stop
                   >{{ r.shortUrl }}</a>

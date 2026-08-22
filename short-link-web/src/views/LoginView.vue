@@ -167,7 +167,7 @@ const submit = async () => {
   position: relative;
   flex: 1.35;
   min-width: 0;
-  background: #111827;
+  background: #0F172A;
   color: #fff;
   display: flex;
   flex-direction: column;

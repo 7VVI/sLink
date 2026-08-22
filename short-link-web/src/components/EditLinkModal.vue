@@ -46,7 +46,7 @@ const submit = async () => {
 <template>
   <Modal title="编辑短链" :width="520" @close="!submitting && emit('close')">
     <div
-      style="background:#FAFAF8;border:1px solid var(--hair);border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:10px;margin-bottom:16px"
+      style="background:#F8FAFC;border:1px solid var(--hair);border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:10px;margin-bottom:16px"
     >
       <Icon name="link" :size="14" style="color:var(--ink-3)" />
       <span class="mono" style="font-size:13px;font-weight:700">{{ link.shortUrl }}</span>

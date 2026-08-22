@@ -121,7 +121,7 @@ onMounted(load);
         class="card"
         style="padding:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;border-style:dashed;background:transparent;cursor:pointer;color:var(--ink-3);min-height:190px"
         @click="showCreate = true"
-        @mouseenter="($event) => { $event.currentTarget.style.color = '#111827'; $event.currentTarget.style.borderColor = '#9CA3AF'; }"
+        @mouseenter="($event) => { $event.currentTarget.style.color = '#0F172A'; $event.currentTarget.style.borderColor = '#9CA3AF'; }"
         @mouseleave="($event) => { $event.currentTarget.style.color = '#9CA3AF'; $event.currentTarget.style.borderColor = '#E5E7EB'; }"
       >
         <Icon name="plus" :size="20" />

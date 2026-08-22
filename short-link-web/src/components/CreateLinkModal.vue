@@ -150,7 +150,7 @@ const submit = async () => {
         <textarea v-model="title" class="input" rows="2" placeholder="用于描述这个网站，方便在列表中识别…" />
       </div>
       <div
-        style="background:#FAFAF8;border:1px solid var(--hair);border-radius:8px;padding:12px 14px;display:flex;align-items:center;gap:10px"
+        style="background:#F8FAFC;border:1px solid var(--hair);border-radius:8px;padding:12px 14px;display:flex;align-items:center;gap:10px"
       >
         <Icon name="info" :size="14" style="color:var(--ink-3)" />
         <span style="font-size:12.5px;color:var(--ink-2)">
@@ -195,7 +195,7 @@ const submit = async () => {
           </select>
         </div>
       </div>
-      <div v-if="bulkText.trim()" style="font-size:12.5px;color:var(--ink-2);background:#FAFAF8;border:1px solid var(--hair);border-radius:8px;padding:10px 12px">
+      <div v-if="bulkText.trim()" style="font-size:12.5px;color:var(--ink-2);background:#F8FAFC;border:1px solid var(--hair);border-radius:8px;padding:10px 12px">
         已识别 <b class="tnum">{{ bulkLines.length }}</b> 条链接，将批量生成短链
       </div>
     </template>

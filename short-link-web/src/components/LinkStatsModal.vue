@@ -53,7 +53,7 @@ const stats = computed(() => [
   <Modal title="访问统计" :width="640" @close="emit('close')">
     <template v-if="detail">
       <div
-        style="display:flex;align-items:center;gap:10px;padding:11px 14px;background:#FAFAF8;border:1px solid var(--hair);border-radius:10px;flex-wrap:wrap"
+        style="display:flex;align-items:center;gap:10px;padding:11px 14px;background:#F8FAFC;border:1px solid var(--hair);border-radius:10px;flex-wrap:wrap"
       >
         <span class="mono" style="font-size:14.5px;font-weight:700">{{ detail.shortUrl }}</span>
         <button class="icon-btn" style="width:24px;height:24px" title="复制短链" @click="copyText(detail.shortUrl)">

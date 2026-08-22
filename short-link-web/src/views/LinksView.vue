@@ -116,10 +116,6 @@ onMounted(() => {
 <template>
   <div class="page">
     <div class="page-head">
-      <div>
-        <div class="page-title">短链接</div>
-        <div class="page-sub">创建、管理与分享你的短链接；点击任意一行查看访问统计</div>
-      </div>
       <div class="head-actions">
         <button class="btn btn-primary" @click="showCreate = true">
           <Icon name="plus" :size="15" :sw="2" />新建短链接

@@ -86,10 +86,6 @@ onMounted(load);
 <template>
   <div class="page">
     <div class="page-head">
-      <div>
-        <div class="page-title">域名管理</div>
-        <div class="page-sub">{{ auth.isAdmin ? '维护短链域名池，默认域名用于未指定域名的短链' : '当前可用的短链域名' }}</div>
-      </div>
       <div class="head-actions">
         <button v-if="auth.isAdmin" class="btn btn-primary" @click="showAdd = true">
           <Icon name="plus" :size="15" :sw="2" />添加域名

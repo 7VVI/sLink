@@ -83,10 +83,6 @@ onMounted(load);
 <template>
   <div class="page">
     <div class="page-head">
-      <div>
-        <div class="page-title">回收站</div>
-        <div class="page-sub">已删除的短链保留 30 天后自动彻底清除，期间可随时恢复</div>
-      </div>
       <div class="head-actions">
         <button
           class="btn btn-danger-ghost"

@@ -21,13 +21,6 @@ const fmtTime = (t) => (t ? String(t).replace('T', ' ').slice(0, 16) : '—');
 
 <template>
   <div class="page">
-    <div class="page-head">
-      <div>
-        <div class="page-title">设置</div>
-        <div class="page-sub">账户信息与系统说明</div>
-      </div>
-    </div>
-
     <div class="card" style="max-width:640px">
       <div class="card-body" style="padding:24px">
         <div style="display:flex;align-items:center;gap:16px;margin-bottom:22px">

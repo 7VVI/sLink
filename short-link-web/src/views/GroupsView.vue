@@ -74,10 +74,6 @@ onMounted(load);
 <template>
   <div class="page">
     <div class="page-head">
-      <div>
-        <div class="page-title">分组</div>
-        <div class="page-sub">用分组组织短链接，删除分组不影响链接本身</div>
-      </div>
       <div class="head-actions">
         <button class="btn btn-primary" @click="showCreate = true">
           <Icon name="plus" :size="15" :sw="2" />新建分组

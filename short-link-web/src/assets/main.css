@@ -102,9 +102,6 @@ textarea.input{height:auto;padding:10px 12px;resize:vertical;line-height:1.6}
 .empty-sub{font-size:12.5px;margin-top:4px}
 .link-underline{color:var(--ink-2);cursor:pointer;font-size:13px;font-weight:500;transition:color .12s;background:none;border:none;padding:0}
 .link-underline:hover{color:var(--ink);text-decoration:underline}
-.dot-list{list-style:none}
-.dot-list li{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2);padding:7px 0}
-.dot-list .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
 /* ---- shell ---- */
 .shell{display:flex;min-height:100vh}
 .nav{width:232px;flex-shrink:0;border-right:1px solid #E9E9E4;background:#FFFFFF;display:flex;flex-direction:column;padding:20px 14px 16px;position:sticky;top:0;height:100vh}

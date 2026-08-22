@@ -57,19 +57,6 @@ const fmtTime = (t) => (t ? String(t).replace('T', ' ').slice(0, 16) : '—');
           <span style="color:var(--ink-3)">注册时间</span>
           <span class="tnum">{{ fmtTime(profile?.createTime) }}</span>
         </div>
-
-        <div class="divider-h" />
-
-        <ul class="dot-list">
-          <li>
-            <span class="dot" style="background:var(--ink)" />
-            登录态由 Sa-Token 管理，30 天有效，多端登录互不影响
-          </li>
-          <li>
-            <span class="dot" style="background:var(--ink)" />
-            密码使用 BCrypt 加密存储；默认管理员请尽快修改初始密码
-          </li>
-        </ul>
       </div>
     </div>
   </div>

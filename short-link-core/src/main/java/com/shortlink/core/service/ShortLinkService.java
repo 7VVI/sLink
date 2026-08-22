@@ -40,7 +40,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -63,6 +62,8 @@ public class ShortLinkService {
 
     private final SurlDomainMapper domainMapper;
 
+    private final DomainService domainService;
+
     private final SegmentIdGenerator idGenerator;
 
     private final ThreeLevelShortUrlCache cache;
@@ -79,6 +80,7 @@ public class ShortLinkService {
                             ShortUrlStatsMapper statsMapper,
                             LinkGroupMapper linkGroupMapper,
                             SurlDomainMapper domainMapper,
+                            DomainService domainService,
                             SegmentIdGenerator idGenerator,
                             ThreeLevelShortUrlCache cache,
                             ShortUrlBloomFilter bloomFilter,
@@ -89,6 +91,7 @@ public class ShortLinkService {
         this.statsMapper = statsMapper;
         this.linkGroupMapper = linkGroupMapper;
         this.domainMapper = domainMapper;
+        this.domainService = domainService;
         this.idGenerator = idGenerator;
         this.cache = cache;
         this.bloomFilter = bloomFilter;
@@ -106,9 +109,9 @@ public class ShortLinkService {
         return Reactors.call(() -> {
             UrlValidator.requireValid(request.longUrl(), properties.getSecurity().getBlacklistDomains());
             long groupId = resolveGroupId(request.groupId(), userId);
-            SurlDomainDO domain = resolveDomain(request.domainId());
-            String domainPrefix = domain == null ? properties.getDomain() : domain.getDomain();
-            long domainId = domain == null ? 0L : domain.getId();
+            SurlDomainDO domain = domainService.resolveForCreate(request.domainId());
+            String domainPrefix = domain.getDomain();
+            long domainId = domain.getId();
 
             long id = idGenerator.nextId();
             String code = Base62.encode(id);
@@ -220,7 +223,7 @@ public class ShortLinkService {
                     Map<Long, String> groupNames = loadGroupNames(List.of(record));
                     Map<Long, String> domainPrefixes = loadDomainPrefixes(List.of(record));
                     return new DetailArgs(record, groupNames.get(record.getGroupId()),
-                            domainPrefix(record, domainPrefixes));
+                            domainPrefix(record, domainPrefixes, loadDefaultDomainPrefix()));
                 })
                 .flatMap(args -> statsQueryService.realtime(code)
                         .map(stats -> toDetailVO(args, stats)));
@@ -273,9 +276,10 @@ public class ShortLinkService {
                             .orderByDesc(ShortUrlDO::getDeleteTime));
             Map<Long, String> groupNames = loadGroupNames(page.getRecords());
             Map<Long, String> domainPrefixes = loadDomainPrefixes(page.getRecords());
+            String defaultPrefix = loadDefaultDomainPrefix();
             List<RecycleLinkVO> records = page.getRecords().stream()
                     .map(record -> {
-                        String prefix = domainPrefix(record, domainPrefixes);
+                        String prefix = domainPrefix(record, domainPrefixes, defaultPrefix);
                         LocalDateTime deleteTime = record.getDeleteTime() == null
                                 ? record.getUpdateTime() : record.getDeleteTime();
                         return new RecycleLinkVO(record.getShortCode(), prefix + "/" + record.getShortCode(),
@@ -422,20 +426,6 @@ public class ShortLinkService {
         }
     }
 
-    private SurlDomainDO resolveDomain(Long domainId) {
-        if (domainId != null && domainId != 0L) {
-            SurlDomainDO domain = domainMapper.selectById(domainId);
-            if (domain == null || domain.getStatus() != ShortLinkConstants.STATUS_ENABLED) {
-                throw new BizException(ErrorCode.DOMAIN_NOT_FOUND, "域名不存在或已停用: " + domainId);
-            }
-            return domain;
-        }
-        return domainMapper.selectOne(new LambdaQueryWrapper<SurlDomainDO>()
-                .eq(SurlDomainDO::getIsDefault, true)
-                .eq(SurlDomainDO::getStatus, ShortLinkConstants.STATUS_ENABLED)
-                .last("LIMIT 1"));
-    }
-
     private ShortUrlDO requireReadable(String code, long userId, boolean admin) {
         ShortUrlDO record = shortUrlMapper.selectOne(new LambdaQueryWrapper<ShortUrlDO>()
                 .eq(ShortUrlDO::getShortCode, code));
@@ -453,19 +443,28 @@ public class ShortLinkService {
     private PageResult<ShortLinkVO> toPageResult(Page<ShortUrlDO> page) {
         Map<Long, String> groupNames = loadGroupNames(page.getRecords());
         Map<Long, String> domainPrefixes = loadDomainPrefixes(page.getRecords());
+        String defaultPrefix = loadDefaultDomainPrefix();
         List<ShortLinkVO> records = page.getRecords().stream()
                 .map(record -> toVO(record, groupNames.get(record.getGroupId()),
-                        domainPrefix(record, domainPrefixes)))
+                        domainPrefix(record, domainPrefixes, defaultPrefix)))
                 .toList();
         return PageResult.of(page.getTotal(), page.getCurrent(), page.getSize(), records);
     }
 
     /**
-     * 域名前缀：未指定（0）或域名记录缺失时回退配置域名。
+     * 域名前缀：域名记录缺失时回退默认域名前缀。
      */
-    private String domainPrefix(ShortUrlDO record, Map<Long, String> domainPrefixes) {
+    private String domainPrefix(ShortUrlDO record, Map<Long, String> domainPrefixes, String defaultPrefix) {
         String prefix = domainPrefixes.get(record.getDomainId());
-        return prefix != null ? prefix : properties.getDomain();
+        return prefix != null ? prefix : defaultPrefix;
+    }
+
+    /**
+     * 默认域名前缀（兜底展示用，正常情况下域名表必有启用中的默认域名）。
+     */
+    private String loadDefaultDomainPrefix() {
+        SurlDomainDO domain = domainService.defaultDomain();
+        return domain == null ? "" : domain.getDomain();
     }
 
     private Map<Long, String> loadGroupNames(List<ShortUrlDO> records) {
@@ -520,10 +519,9 @@ public class ShortLinkService {
     }
 
     private ShortLinkVO toVO(ShortUrlDO record, String groupName, String domainPrefix) {
-        String prefix = Objects.requireNonNullElse(domainPrefix, properties.getDomain());
-        return new ShortLinkVO(record.getShortCode(), prefix + "/" + record.getShortCode(),
+        return new ShortLinkVO(record.getShortCode(), domainPrefix + "/" + record.getShortCode(),
                 record.getLongUrl(), record.getTitle(), record.getStatus(),
-                record.getGroupId(), groupName, record.getDomainId(), prefix,
+                record.getGroupId(), groupName, record.getDomainId(), domainPrefix,
                 record.getExpireTime(), record.getCreateTime());
     }
 
@@ -533,10 +531,9 @@ public class ShortLinkService {
 
     private ShortLinkDetailVO toDetailVO(DetailArgs args, com.shortlink.common.dto.StatsVO stats) {
         ShortUrlDO record = args.record();
-        String prefix = Objects.requireNonNullElse(args.domainPrefix(), properties.getDomain());
-        return new ShortLinkDetailVO(record.getShortCode(), prefix + "/" + record.getShortCode(),
+        return new ShortLinkDetailVO(record.getShortCode(), args.domainPrefix() + "/" + record.getShortCode(),
                 record.getLongUrl(), record.getTitle(), record.getStatus(),
-                record.getGroupId(), args.groupName(), record.getDomainId(), prefix,
+                record.getGroupId(), args.groupName(), record.getDomainId(), args.domainPrefix(),
                 record.getExpireTime(), record.getCreateTime(), stats);
     }
 }

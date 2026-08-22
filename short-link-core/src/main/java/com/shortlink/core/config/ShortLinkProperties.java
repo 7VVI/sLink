@@ -12,11 +12,6 @@ import java.util.List;
 @ConfigurationProperties(prefix = "shortlink")
 public class ShortLinkProperties {
 
-    /**
-     * 短链对外域名，例如 https://s.cn。
-     */
-    private String domain = "http://localhost:8080";
-
     private final IdGenerator idGenerator = new IdGenerator();
 
     private final Cache cache = new Cache();
@@ -30,14 +25,6 @@ public class ShortLinkProperties {
     private final RateLimit rateLimit = new RateLimit();
 
     private final RecycleBin recycleBin = new RecycleBin();
-
-    public String getDomain() {
-        return domain;
-    }
-
-    public void setDomain(String domain) {
-        this.domain = domain;
-    }
 
     public IdGenerator getIdGenerator() {
         return idGenerator;

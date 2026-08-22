@@ -7,7 +7,6 @@ import com.shortlink.common.dto.DomainVO;
 import com.shortlink.common.exception.BizException;
 import com.shortlink.common.exception.ErrorCode;
 import com.shortlink.common.util.UrlValidator;
-import com.shortlink.core.config.ShortLinkProperties;
 import com.shortlink.core.dal.entity.SurlDomainDO;
 import com.shortlink.core.dal.mapper.SurlDomainMapper;
 import com.shortlink.core.support.Reactors;
@@ -20,6 +19,7 @@ import java.util.List;
 
 /**
  * 域名领域服务：管理端增删改查，创建短链时解析可用域名。
+ * 域名表（surl_domain）是短链域名的唯一事实来源。
  *
  * <p>默认域名全局唯一（is_default=1），不允许删除或停用；
  * 跳转与域名无关，短码在任意已配置域名下均可解析。</p>
@@ -29,11 +29,8 @@ public class DomainService {
 
     private final SurlDomainMapper domainMapper;
 
-    private final ShortLinkProperties properties;
-
-    public DomainService(SurlDomainMapper domainMapper, ShortLinkProperties properties) {
+    public DomainService(SurlDomainMapper domainMapper) {
         this.domainMapper = domainMapper;
-        this.properties = properties;
     }
 
     /**
@@ -140,7 +137,7 @@ public class DomainService {
     }
 
     /**
-     * 创建短链时解析域名：domainId 为空取默认域名；均无记录时回退配置域名（domainId=0）。
+     * 创建短链时解析域名：domainId 为空取默认域名；无任何可用域名时抛出业务异常。
      */
     public SurlDomainDO resolveForCreate(Long domainId) {
         if (domainId != null && domainId != 0L) {
@@ -150,17 +147,21 @@ public class DomainService {
             }
             return domain;
         }
+        SurlDomainDO domain = defaultDomain();
+        if (domain == null) {
+            throw new BizException(ErrorCode.DOMAIN_NOT_FOUND, "暂无可用默认域名，请先在域名管理中配置");
+        }
+        return domain;
+    }
+
+    /**
+     * 当前启用的默认域名，无则返回 null。
+     */
+    public SurlDomainDO defaultDomain() {
         return domainMapper.selectOne(new LambdaQueryWrapper<SurlDomainDO>()
                 .eq(SurlDomainDO::getIsDefault, true)
                 .eq(SurlDomainDO::getStatus, ShortLinkConstants.STATUS_ENABLED)
                 .last("LIMIT 1"));
-    }
-
-    /**
-     * 兜底域名前缀（无任何域名记录时使用配置的 shortlink.domain）。
-     */
-    public String fallbackDomainPrefix() {
-        return normalize(properties.getDomain());
     }
 
     private SurlDomainDO requireExists(long domainId) {

@@ -179,10 +179,15 @@ onMounted(() => {
               </td>
               <td style="max-width:320px">
                 <div style="display:flex;align-items:center;gap:3px">
-                  <span
+                  <a
+                    :href="r.shortUrl"
+                    target="_blank"
+                    rel="noreferrer"
                     class="mono"
-                    style="font-size:12.5px;font-weight:700;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
-                  >{{ r.shortUrl }}</span>
+                    style="font-size:12.5px;font-weight:700;color:#2563EB;text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
+                    :title="r.shortUrl"
+                    @click.stop
+                  >{{ r.shortUrl }}</a>
                   <button
                     class="icon-btn copy-mini"
                     style="width:22px;height:22px;flex-shrink:0"
@@ -201,7 +206,7 @@ onMounted(() => {
                   </button>
                 </div>
                 <div
-                  style="font-size:12px;color:#2563EB;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
+                  style="font-size:12px;color:var(--ink-3);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
                   :title="r.longUrl"
                 >
                   {{ (r.longUrl || '').replace(/^https?:\/\//, '') }}

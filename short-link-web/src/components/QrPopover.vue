@@ -1,13 +1,11 @@
 <script setup>
-// 二维码小弹窗：锚定在触发按钮旁侧显示（Teleport + fixed 定位），点击外部关闭
+// 二维码小弹窗：锚定在触发按钮旁侧显示（Teleport + fixed 定位），二维码下方即下载按钮
 import { onBeforeUnmount, onMounted, ref, nextTick } from 'vue';
 import QRCode from 'qrcode';
-import { copyText } from '../stores/toast.js';
 import Icon from './Icon.vue';
 
 const props = defineProps({
   shortUrl: { type: String, required: true },
-  longUrl: { type: String, default: '' },
   anchorEl: { type: HTMLElement, default: null },
 });
 const emit = defineEmits(['close']);
@@ -45,6 +43,16 @@ const onEsc = (e) => {
   }
 };
 
+const download = () => {
+  if (!dataUrl.value) {
+    return;
+  }
+  const a = document.createElement('a');
+  a.href = dataUrl.value;
+  a.download = `qrcode-${props.shortUrl.split('/').pop() || 'slink'}.png`;
+  a.click();
+};
+
 onMounted(async () => {
   await place();
   document.addEventListener('mousedown', onDocDown, true);
@@ -74,16 +82,8 @@ onBeforeUnmount(() => {
         <img v-if="dataUrl" :src="dataUrl" alt="QR" style="width:148px;height:148px;display:block" />
         <div v-else style="width:148px;height:148px" />
       </div>
-      <div class="mono" style="font-size:12px;font-weight:700;word-break:break-all;text-align:center;line-height:1.4">
-        {{ shortUrl }}
-      </div>
-      <div
-        style="font-size:11px;color:var(--ink-3);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center"
-      >
-        → {{ (longUrl || '').replace(/^https?:\/\//, '') || '—' }}
-      </div>
-      <button class="btn btn-ghost" style="height:28px;font-size:12px;margin-top:8px" @click="copyText(shortUrl)">
-        <Icon name="copy" :size="12" />复制短链
+      <button class="btn btn-primary" style="height:30px;font-size:12.5px" @click="download">
+        <Icon name="copy" :size="13" />下载二维码
       </button>
     </div>
   </teleport>
@@ -97,7 +97,7 @@ onBeforeUnmount(() => {
   padding: 10px;
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: 9px;
   background: #fff;
   border: 1px solid var(--border);
   border-radius: 12px;

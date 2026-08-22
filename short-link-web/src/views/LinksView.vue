@@ -297,7 +297,6 @@ onMounted(() => {
     <QrPopover
       v-if="qr"
       :short-url="qr.row.shortUrl"
-      :long-url="qr.row.longUrl"
       :anchor-el="qr.anchor"
       @close="qr = null"
     />

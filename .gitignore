@@ -15,3 +15,7 @@ logs/
 
 .DS_Store
 Thumbs.db
+
+# 本地/私有环境配置（含真实地址与密码，禁止入库）
+short-link-server/src/main/resources/application-local.yml
+short-link-server/src/main/resources/shardingLocal.yaml

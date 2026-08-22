@@ -27,6 +27,7 @@ WebFlux (Netty)  ──  Sa-Token 鉴权过滤器(SaReactorFilter)  ──  按I
 shortLink
 ├── short-link-common     通用层：Base62、URL 校验、Redis Key 规划、错误码、Result、DTO
 ├── short-link-core       核心层：发号器、三级缓存、布隆过滤器、Disruptor 统计、领域服务、DAL
+├── short-link-web        前端：Vue 3 + Vite 控制台（构建产物内嵌进 server jar）
 ├── short-link-server     接入层：WebFlux 控制器、Sa-Token 鉴权、限流、OpenAPI 文档（可执行 jar）
 └── deploy
     ├── docker-compose.yml   一键启动 MySQL 8 + Redis 7
@@ -50,15 +51,29 @@ mvn clean package -DskipTests
 java -jar short-link-server/target/short-link-server-1.0.0-SNAPSHOT.jar
 ```
 
-启动成功后：
+启动成功后，**一个服务即包含前后端**：
 
-- 应用：<http://localhost:8080>
+- 管理控制台（前端）：<http://localhost:8080>，登录后进入短链管理界面
+- 短码跳转：<http://localhost:8080/{code}> 302 到目标链接，与控制台互不冲突
 - Swagger 文档：<http://localhost:8080/swagger-ui.html>
 - 健康检查：<http://localhost:8080/actuator/health>
 - 默认管理员：`admin / admin123`（仅用户表为空时创建，登录后请立即修改）
 
 > 连接密码等在 `short-link-server/src/main/resources/sharding.yaml`（数据库）与
 > `application.yml`（Redis）中修改。
+
+### 3. 前端开发模式（可选）
+
+前后端分离联调时无需重新打包：前端以 Vite 开发服务器启动，`/api` 自动代理到 8080：
+
+```bash
+cd short-link-web
+npm install
+npm run dev              # http://localhost:5173，改动热更新
+```
+
+> 根构建需要网络下载 Node（frontend-maven-plugin，装至 `short-link-web/target/`，
+> 不污染全局）；已装 Node 20+ 时上述命令开箱即用。
 
 ## 四、API 一览
 
@@ -177,7 +192,27 @@ mvn test
   Redisson 等三方组件统一降噪至 WARN
 - **目录**：默认 `./logs`，可用环境变量 `LOG_HOME` 覆盖（如挂载数据卷）
 
-## 八、部署形态与后续规划
+## 八、前端控制台（short-link-web）
+
+基于 `docs/index.html` 原型实现的 Vue 3 管理控制台，技术栈：
+Vue 3.5 + vue-router（hash 模式，与 `/{code}` 跳转路由隔离）+ Pinia + Axios + qrcode。
+
+**页面**：登录、短链管理（搜索/分组/状态过滤、创建单个与批量、二维码、启停、删除）、
+分组管理、域名管理（默认域名切换，管理员增删）、访问监控（实时 PV/UV + 7/30 天趋势图）、
+回收站（剩余天数进度条、还原、彻底删除）、设置（账号信息、修改密码）。
+
+**与后端的集成方式**（单服务启动即含前后端）：
+
+- `short-link-web` 构建时由 frontend-maven-plugin 下载 Node 并执行 `npm run build`，
+  产物输出到 `target/dist/static`
+- maven-jar-plugin 以 `target/dist` 为 classes 打成 `short-link-web` jar，
+  `short-link-server` 依赖该 jar，静态资源最终位于可执行 jar 的 `classpath:/static`
+- 路由约定：`/` 与 `/#/...` 为控制台，`/api/**` 为接口，其余单段路径按短码 302 跳转
+
+**注意**：所有雪花 ID（用户/分组/域名）后端以字符串序列化（`JacksonConfiguration` 将
+Long 统一转 String），前端全链路按字符串传递，避免 JS Number 53 位精度丢失。
+
+## 九、部署形态与后续规划
 
 当前为**模块化单体**（一个可执行 jar），生产可按设计文档演进：
 

@@ -14,6 +14,7 @@
     <modules>
         <module>short-link-common</module>
         <module>short-link-core</module>
+        <module>short-link-web</module>
         <module>short-link-server</module>
     </modules>
 
@@ -51,6 +52,11 @@
             <dependency>
                 <groupId>com.shortlink</groupId>
                 <artifactId>short-link-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.shortlink</groupId>
+                <artifactId>short-link-web</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

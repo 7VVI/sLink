@@ -156,53 +156,81 @@ onMounted(() => {
         <table class="tbl">
           <thead>
             <tr>
-              <th>短链接</th>
-              <th>目标链接</th>
-              <th>分组</th>
+              <th>描述</th>
+              <th>短链 / 目标链接</th>
+              <th style="text-align:right">访问次数</th>
+              <th style="text-align:right">访问人数</th>
               <th>状态</th>
-              <th>创建时间</th>
               <th style="text-align:right">操作</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="r in filtered" :key="r.code" class="clickable" @click="statsCode = r.code">
-              <td>
-                <span class="shortlink">
-                  <span class="mono">{{ r.shortUrl }}</span>
+              <td style="max-width:240px">
+                <div
+                  style="font-size:13px;font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
+                  :title="r.title || r.longUrl"
+                >
+                  {{ r.title || (r.longUrl || '').replace(/^https?:\/\//, '') || r.code }}
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;margin-top:3px;font-size:12px;color:var(--ink-3);white-space:nowrap">
+                  <span class="tnum">{{ fmtTime(r.createTime) }}</span>
+                  <span class="tag">{{ r.groupName || '未分组' }}</span>
+                </div>
+              </td>
+              <td style="max-width:320px">
+                <div style="display:flex;align-items:center;gap:3px">
+                  <span
+                    class="mono"
+                    style="font-size:12.5px;font-weight:700;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
+                  >{{ r.shortUrl }}</span>
                   <button
                     class="icon-btn copy-mini"
-                    style="width:22px;height:22px"
+                    style="width:22px;height:22px;flex-shrink:0"
                     title="复制短链"
                     @click.stop="copyText(r.shortUrl)"
                   >
                     <Icon name="copy" :size="13" />
                   </button>
-                </span>
-              </td>
-              <td style="max-width:230px">
-                <span
-                  style="display:inline-flex;align-items:center;gap:7px;color:#2563EB;font-size:12.5px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
-                  :title="r.title || r.longUrl"
+                  <button
+                    class="icon-btn copy-mini"
+                    style="width:22px;height:22px;flex-shrink:0"
+                    title="二维码"
+                    @click.stop="qr = { row: r, anchor: $event.currentTarget }"
+                  >
+                    <Icon name="qr" :size="13" />
+                  </button>
+                </div>
+                <div
+                  style="font-size:12px;color:#2563EB;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
+                  :title="r.longUrl"
                 >
-                  <span class="fav">{{ (r.code || '?').slice(0, 1).toUpperCase() }}</span>
                   {{ (r.longUrl || '').replace(/^https?:\/\//, '') }}
-                </span>
+                </div>
               </td>
-              <td>
-                <span class="tag">{{ r.groupName || '未分组' }}</span>
+              <td style="text-align:right;white-space:nowrap">
+                <div class="tnum" style="font-size:13px;font-weight:700">
+                  今日 {{ (Number(r.todayPv) || 0).toLocaleString() }}
+                </div>
+                <div class="tnum" style="font-size:12px;color:var(--ink-3);margin-top:2px">
+                  累计 {{ (Number(r.totalPv) || 0).toLocaleString() }}
+                </div>
+              </td>
+              <td style="text-align:right;white-space:nowrap">
+                <div class="tnum" style="font-size:13px;font-weight:700">
+                  今日 {{ (Number(r.todayUv) || 0).toLocaleString() }}
+                </div>
+                <div class="tnum" style="font-size:12px;color:var(--ink-3);margin-top:2px">
+                  累计 {{ (Number(r.totalUv) || 0).toLocaleString() }}
+                </div>
               </td>
               <td>
                 <span class="pill" :class="Number(r.status) === 1 ? 'green' : 'gray'">
                   {{ Number(r.status) === 1 ? '启用' : '停用' }}
                 </span>
               </td>
-              <td style="color:var(--ink-3);font-size:12.5px;white-space:nowrap">{{ fmtTime(r.createTime) }}</td>
               <td @click.stop>
                 <div style="display:flex;justify-content:flex-end;gap:2px">
-                  <button class="icon-btn" title="复制" @click="copyText(r.shortUrl)"><Icon name="copy" :size="14" /></button>
-                  <button class="icon-btn" title="二维码" @click="qr = { row: r, anchor: $event.currentTarget }">
-                    <Icon name="qr" :size="14" />
-                  </button>
                   <button class="icon-btn" title="编辑" @click="editing = r"><Icon name="edit" :size="14" /></button>
                   <button class="icon-btn" title="访问统计" @click="statsCode = r.code"><Icon name="chart" :size="14" /></button>
                   <button class="icon-btn" :title="Number(r.status) === 1 ? '下线' : '上线'" @click="toggleStatus(r)">

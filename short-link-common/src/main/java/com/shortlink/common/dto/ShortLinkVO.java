@@ -3,7 +3,7 @@ package com.shortlink.common.dto;
 import java.time.LocalDateTime;
 
 /**
- * 短链信息。
+ * 短链信息（含列表页实时统计：今日/累计 PV、今日/累计 UV）。
  */
 public record ShortLinkVO(
         String code,
@@ -16,6 +16,10 @@ public record ShortLinkVO(
         Long domainId,
         String domain,
         LocalDateTime expireTime,
-        LocalDateTime createTime
+        LocalDateTime createTime,
+        long todayPv,
+        long todayUv,
+        long totalPv,
+        long totalUv
 ) {
 }

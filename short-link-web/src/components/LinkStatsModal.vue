@@ -41,13 +41,11 @@ const chartData = computed(() =>
     .map((h) => ({ d: String(h.statDate).slice(5), v: Number(h.pv) || 0 })),
 );
 
-const historyPv = computed(() => chartData.value.reduce((s, d) => s + d.v, 0));
-
 const stats = computed(() => [
   { label: '今日点击', value: Number(detail.value?.stats?.todayPv) || 0, note: '实时' },
   { label: '今日访客', value: Number(detail.value?.stats?.todayUv) || 0, note: 'UV 去重' },
   { label: '累计点击', value: Number(detail.value?.stats?.totalPv) || 0, note: '自创建起' },
-  { label: '归档点击', value: historyPv.value, note: range.value === '30' ? '近 30 天' : '近 7 天' },
+  { label: '累计访客', value: Number(detail.value?.stats?.totalUv) || 0, note: '归档 + 今日' },
 ]);
 </script>
 

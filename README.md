@@ -83,8 +83,8 @@ npm run dev              # http://localhost:5173，改动热更新
 | POST | `/api/auth/login` | 登录，返回 token | 公开 |
 | POST | `/api/auth/logout` | 退出 | 登录 |
 | GET | `/api/auth/me` | 当前用户信息 | 登录 |
-| POST | `/api/short-links` | 创建短链（可指定分组、域名、有效期） | 登录 |
-| GET | `/api/short-links?groupId=` | 我的短链分页（可按分组过滤，0=未分组） | 登录 |
+| POST | `/api/short-links` | 创建短链（可指定分组、域名、有效期、描述 title） | 登录 |
+| GET | `/api/short-links?groupId=` | 我的短链分页（可按分组过滤，0=未分组；含今日/累计 PV·UV 实时统计） | 登录 |
 | GET | `/api/short-links/{code}` | 详情（含实时统计） | 属主/管理员 |
 | PUT | `/api/short-links/{code}` | 编辑短链（目标链接/标题/分组，缓存失效秒级生效） | 属主/管理员 |
 | PUT | `/api/short-links/{code}/group` | 移动到分组（0=未分组） | 属主/管理员 |

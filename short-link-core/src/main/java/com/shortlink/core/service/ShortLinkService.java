@@ -135,7 +135,7 @@ public class ShortLinkService {
             bloomFilter.add(code);
             cache.put(code, ShortUrlCacheValue.of(record.getLongUrl(), record.getStatus(),
                     toExpireMillis(record.getExpireTime())));
-            return toVO(record, groupNameOf(groupId), domainPrefix);
+            return toVO(record, groupNameOf(groupId), domainPrefix, null);
         });
     }
 
@@ -468,9 +468,12 @@ public class ShortLinkService {
         Map<Long, String> groupNames = loadGroupNames(page.getRecords());
         Map<Long, String> domainPrefixes = loadDomainPrefixes(page.getRecords());
         String defaultPrefix = loadDefaultDomainPrefix();
+        Map<String, com.shortlink.common.dto.StatsVO> stats = statsQueryService.realtimeBatch(
+                page.getRecords().stream().map(ShortUrlDO::getShortCode).toList());
         List<ShortLinkVO> records = page.getRecords().stream()
                 .map(record -> toVO(record, groupNames.get(record.getGroupId()),
-                        domainPrefix(record, domainPrefixes, defaultPrefix)))
+                        domainPrefix(record, domainPrefixes, defaultPrefix),
+                        stats.get(record.getShortCode())))
                 .toList();
         return PageResult.of(page.getTotal(), page.getCurrent(), page.getSize(), records);
     }
@@ -542,11 +545,16 @@ public class ShortLinkService {
                 toExpireMillis(record.getExpireTime()));
     }
 
-    private ShortLinkVO toVO(ShortUrlDO record, String groupName, String domainPrefix) {
+    private ShortLinkVO toVO(ShortUrlDO record, String groupName, String domainPrefix,
+                             com.shortlink.common.dto.StatsVO stats) {
         return new ShortLinkVO(record.getShortCode(), domainPrefix + "/" + record.getShortCode(),
                 record.getLongUrl(), record.getTitle(), record.getStatus(),
                 record.getGroupId(), groupName, record.getDomainId(), domainPrefix,
-                record.getExpireTime(), record.getCreateTime());
+                record.getExpireTime(), record.getCreateTime(),
+                stats == null ? 0L : stats.todayPv(),
+                stats == null ? 0L : stats.todayUv(),
+                stats == null ? 0L : stats.totalPv(),
+                stats == null ? 0L : stats.totalUv());
     }
 
     // detail 组装参数载体

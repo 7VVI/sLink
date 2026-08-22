@@ -66,8 +66,8 @@ const submit = async () => {
         </select>
       </div>
       <div class="field">
-        <label>备注（可选）</label>
-        <input v-model="title" class="input" placeholder="用于内部管理的备注信息…" />
+        <label>描述（可选）</label>
+        <textarea v-model="title" class="input" rows="2" placeholder="用于描述这个网站，方便在列表中识别…" />
       </div>
     </div>
     <template #footer>

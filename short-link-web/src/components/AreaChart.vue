@@ -1,5 +1,5 @@
 <script setup>
-// 极简平滑面积图（移植自原型：渐变填充、数据点与关键数值常驻显示、悬浮增强提示）
+// 平滑面积图：常驻 X/Y 坐标轴与刻度（纵轴数值、横轴时间）、数据点与关键数值直接可见、悬浮增强提示
 import { computed, ref } from 'vue';
 
 const props = defineProps({
@@ -10,7 +10,7 @@ const props = defineProps({
 const hover = ref(null);
 const W = 720;
 const H = computed(() => props.height);
-const PAD = { t: 22, r: 8, b: 22, l: 4 };
+const PAD = { t: 22, r: 14, b: 28, l: 40 };
 
 const max = computed(() => Math.max(...props.data.map((d) => d.v)));
 const min = computed(() => Math.min(...props.data.map((d) => d.v)));
@@ -51,7 +51,7 @@ const area = computed(() => {
   return `${line.value} L ${p[p.length - 1].x.toFixed(2)},${H.value - PAD.b} L ${p[0].x.toFixed(2)},${H.value - PAD.b} Z`;
 });
 
-// 纵轴刻度：取整刻度（步长 1/2/5×10^n），避免 0.4/0.8 这类小数
+// 纵轴刻度：整数步长（1/2/5×10^n），避免小数刻度
 const yTicks = computed(() => {
   const span = top.value - bottom.value || 1;
   const rawStep = span / 2;
@@ -66,9 +66,16 @@ const yTicks = computed(() => {
   return ticks;
 });
 
-const xLabels = computed(() => {
-  const step = Math.max(1, Math.ceil(props.data.length / 8));
-  return props.data.map((d, i) => ({ d, i })).filter(({ i }) => i % step === 0 || i === props.data.length - 1);
+// 横轴时间刻度：数据点 ≤10 个时逐日显示，更多时等距抽样（始终包含首尾）
+const xTicks = computed(() => {
+  const n = props.data.length;
+  if (!n) {
+    return [];
+  }
+  const step = n <= 10 ? 1 : Math.ceil(n / 10);
+  return props.data
+    .map((d, i) => ({ d: d.d, i }))
+    .filter(({ i }) => i % step === 0 || i === n - 1);
 });
 
 // 常驻数值标签：约 6 个等距点 + 最后一天，数据点少时全部显示
@@ -113,16 +120,37 @@ const onMove = (e) => {
           <stop offset="1" stop-color="#111827" stop-opacity="0" />
         </linearGradient>
       </defs>
+
+      <!-- 纵轴网格线 + 刻度值（常驻） -->
       <g v-for="t in yTicks" :key="t.v">
         <line :x1="PAD.l" :x2="W - PAD.r" :y1="t.y" :y2="t.y" stroke="#F0F0EC" stroke-dasharray="3 4" />
-        <text :x="PAD.l + 2" :y="t.y - 5" font-size="10.5" fill="#9CA3AF">{{ Math.round(t.v).toLocaleString() }}</text>
+        <line :x1="PAD.l - 4" :x2="PAD.l" :y1="t.y" :y2="t.y" stroke="#D1D5DB" />
+        <text :x="PAD.l - 7" :y="t.y + 3.5" font-size="10.5" fill="#9CA3AF" text-anchor="end">
+          {{ Math.round(t.v).toLocaleString() }}
+        </text>
       </g>
+
+      <!-- 坐标轴（常驻）：Y 轴竖线 + X 轴横线 -->
+      <line :x1="PAD.l" :x2="PAD.l" :y1="PAD.t - 8" :y2="H - PAD.b" stroke="#D1D5DB" stroke-width="1" />
+      <line :x1="PAD.l" :x2="W - PAD.r" :y1="H - PAD.b" :y2="H - PAD.b" stroke="#D1D5DB" stroke-width="1" />
+
       <path :d="area" fill="url(#areaFill)" />
       <path v-if="line" :d="line" fill="none" stroke="#111827" stroke-width="1.8" stroke-linecap="round" />
-      <g v-for="l in xLabels" :key="l.i">
-        <text :x="l.i === data.length - 1 ? W - PAD.r : xs(l.i)" :y="H - 6" font-size="10.5" fill="#9CA3AF"
-              :text-anchor="l.i === data.length - 1 ? 'end' : 'middle'">{{ l.d.d }}</text>
+
+      <!-- 横轴时间刻度（常驻）：短刻度线 + 日期标签 -->
+      <g v-for="t in xTicks" :key="'xt' + t.i">
+        <line :x1="xs(t.i)" :x2="xs(t.i)" :y1="H - PAD.b" :y2="H - PAD.b + 4" stroke="#D1D5DB" />
+        <text
+          :x="t.i === data.length - 1 ? Math.min(xs(t.i), W - PAD.r - 2) : t.i === 0 ? PAD.l + 6 : xs(t.i)"
+          :y="H - PAD.b + 16"
+          font-size="10.5"
+          fill="#9CA3AF"
+          :text-anchor="t.i === data.length - 1 ? 'end' : t.i === 0 ? 'start' : 'middle'"
+        >
+          {{ t.d }}
+        </text>
       </g>
+
       <!-- 常驻数据点：无需悬浮即可看到折线位置 -->
       <circle v-for="(p, i) in pts" :key="'pt' + i" :cx="p.x" :cy="p.y" r="2.6" fill="#111827" stroke="#fff" stroke-width="1.2" />
       <!-- 常驻数值标签 -->
@@ -132,6 +160,7 @@ const onMove = (e) => {
           {{ l.v.toLocaleString() }}
         </text>
       </g>
+
       <g v-if="hover !== null">
         <line :x1="pts[hover].x" :x2="pts[hover].x" :y1="PAD.t - 6" :y2="H - PAD.b" stroke="#D1D5DB" />
         <circle :cx="pts[hover].x" :cy="pts[hover].y" r="3.6" fill="#111827" stroke="#fff" stroke-width="1.6" />

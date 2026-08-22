@@ -105,7 +105,7 @@ const remove = async () => {
   }
 };
 
-const fmtTime = (t) => (t ? String(t).replace('T', ' ').slice(0, 16) : '—');
+const fmtTime = (t) => (t ? String(t).replace('T', ' ').slice(0, 19) : '—');
 
 onMounted(() => {
   load();
@@ -156,26 +156,25 @@ onMounted(() => {
         <table class="tbl">
           <thead>
             <tr>
-              <th>描述</th>
-              <th>短链 / 目标链接</th>
-              <th style="text-align:right">访问次数</th>
-              <th style="text-align:right">访问人数</th>
+              <th>短链信息</th>
+              <th>短链网址</th>
+              <th>访问次数</th>
+              <th>访问人数</th>
               <th>状态</th>
               <th style="text-align:right">操作</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="r in filtered" :key="r.code" class="clickable" @click="statsCode = r.code">
-              <td style="max-width:240px">
+              <td style="max-width:250px">
                 <div
-                  style="font-size:13px;font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
+                  style="font-size:13px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
                   :title="r.title || r.longUrl"
                 >
                   {{ r.title || (r.longUrl || '').replace(/^https?:\/\//, '') || r.code }}
                 </div>
-                <div style="display:flex;align-items:center;gap:8px;margin-top:3px;font-size:12px;color:var(--ink-3);white-space:nowrap">
-                  <span class="tnum">{{ fmtTime(r.createTime) }}</span>
-                  <span class="tag">{{ r.groupName || '未分组' }}</span>
+                <div class="tnum" style="font-size:12px;color:var(--ink-3);margin-top:3px;white-space:nowrap">
+                  {{ fmtTime(r.createTime) }}
                 </div>
               </td>
               <td style="max-width:320px">
@@ -208,20 +207,24 @@ onMounted(() => {
                   {{ (r.longUrl || '').replace(/^https?:\/\//, '') }}
                 </div>
               </td>
-              <td style="text-align:right;white-space:nowrap">
-                <div class="tnum" style="font-size:13px;font-weight:700">
-                  今日 {{ (Number(r.todayPv) || 0).toLocaleString() }}
+              <td style="white-space:nowrap">
+                <div style="display:flex;align-items:baseline;gap:5px">
+                  <span class="tnum" style="font-size:13px;font-weight:600;color:var(--ink)">{{ (Number(r.todayPv) || 0).toLocaleString() }}</span>
+                  <span style="font-size:11.5px;color:var(--ink-3)">今日</span>
                 </div>
-                <div class="tnum" style="font-size:12px;color:var(--ink-3);margin-top:2px">
-                  累计 {{ (Number(r.totalPv) || 0).toLocaleString() }}
+                <div style="display:flex;align-items:baseline;gap:5px;margin-top:2px">
+                  <span class="tnum" style="font-size:13px;font-weight:600;color:var(--ink)">{{ (Number(r.totalPv) || 0).toLocaleString() }}</span>
+                  <span style="font-size:11.5px;color:var(--ink-3)">累计</span>
                 </div>
               </td>
-              <td style="text-align:right;white-space:nowrap">
-                <div class="tnum" style="font-size:13px;font-weight:700">
-                  今日 {{ (Number(r.todayUv) || 0).toLocaleString() }}
+              <td style="white-space:nowrap">
+                <div style="display:flex;align-items:baseline;gap:5px">
+                  <span class="tnum" style="font-size:13px;font-weight:600;color:var(--ink)">{{ (Number(r.todayUv) || 0).toLocaleString() }}</span>
+                  <span style="font-size:11.5px;color:var(--ink-3)">今日</span>
                 </div>
-                <div class="tnum" style="font-size:12px;color:var(--ink-3);margin-top:2px">
-                  累计 {{ (Number(r.totalUv) || 0).toLocaleString() }}
+                <div style="display:flex;align-items:baseline;gap:5px;margin-top:2px">
+                  <span class="tnum" style="font-size:13px;font-weight:600;color:var(--ink)">{{ (Number(r.totalUv) || 0).toLocaleString() }}</span>
+                  <span style="font-size:11.5px;color:var(--ink-3)">累计</span>
                 </div>
               </td>
               <td>

@@ -1,16 +1,17 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { api } from '../api/index.js';
 import { copyText, toast } from '../stores/toast.js';
 import Icon from '../components/Icon.vue';
 import Empty from '../components/Empty.vue';
 import ConfirmModal from '../components/ConfirmModal.vue';
-import QrModal from '../components/QrModal.vue';
 import CreateLinkModal from '../components/CreateLinkModal.vue';
+import EditLinkModal from '../components/EditLinkModal.vue';
+import QrPopover from '../components/QrPopover.vue';
+import LinkStatsModal from '../components/LinkStatsModal.vue';
 
 const route = useRoute();
-const router = useRouter();
 
 const rows = ref([]);
 const total = ref(0);
@@ -24,7 +25,9 @@ const statusFilter = ref('all');
 const keyword = ref('');
 
 const showCreate = ref(false);
-const qrLink = ref(null);
+const editing = ref(null);
+const qr = ref(null);
+const statsCode = ref('');
 const deleting = ref(null);
 
 const filtered = computed(() =>
@@ -115,7 +118,7 @@ onMounted(() => {
     <div class="page-head">
       <div>
         <div class="page-title">短链接</div>
-        <div class="page-sub">创建、管理与分享你的短链接</div>
+        <div class="page-sub">创建、管理与分享你的短链接；点击任意一行查看访问统计</div>
       </div>
       <div class="head-actions">
         <button class="btn btn-primary" @click="showCreate = true">
@@ -162,7 +165,7 @@ onMounted(() => {
             </tr>
           </thead>
           <tbody>
-            <tr v-for="r in filtered" :key="r.code" class="clickable" @click="router.push({ name: 'analytics', query: { code: r.code } })">
+            <tr v-for="r in filtered" :key="r.code" class="clickable" @click="statsCode = r.code">
               <td>
                 <span class="shortlink">
                   <span class="mono">{{ r.shortUrl }}</span>
@@ -197,7 +200,11 @@ onMounted(() => {
               <td @click.stop>
                 <div style="display:flex;justify-content:flex-end;gap:2px">
                   <button class="icon-btn" title="复制" @click="copyText(r.shortUrl)"><Icon name="copy" :size="14" /></button>
-                  <button class="icon-btn" title="二维码" @click="qrLink = r"><Icon name="qr" :size="14" /></button>
+                  <button class="icon-btn" title="二维码" @click="qr = { row: r, anchor: $event.currentTarget }">
+                    <Icon name="qr" :size="14" />
+                  </button>
+                  <button class="icon-btn" title="编辑" @click="editing = r"><Icon name="edit" :size="14" /></button>
+                  <button class="icon-btn" title="访问统计" @click="statsCode = r.code"><Icon name="chart" :size="14" /></button>
                   <button class="icon-btn" :title="Number(r.status) === 1 ? '下线' : '上线'" @click="toggleStatus(r)">
                     <Icon :name="Number(r.status) === 1 ? 'eye' : 'refresh'" :size="14" />
                   </button>
@@ -244,7 +251,21 @@ onMounted(() => {
       @close="showCreate = false"
       @created="showCreate = false; pageNo = 1; load(); loadGroups()"
     />
-    <QrModal v-if="qrLink" :short-url="qrLink.shortUrl" :long-url="qrLink.longUrl" @close="qrLink = null" />
+    <EditLinkModal
+      v-if="editing"
+      :link="editing"
+      :groups="groups"
+      @close="editing = null"
+      @updated="editing = null; load()"
+    />
+    <QrPopover
+      v-if="qr"
+      :short-url="qr.row.shortUrl"
+      :long-url="qr.row.longUrl"
+      :anchor-el="qr.anchor"
+      @close="qr = null"
+    />
+    <LinkStatsModal v-if="statsCode" :code="statsCode" @close="statsCode = ''" />
     <ConfirmModal
       v-if="deleting"
       title="移入回收站"

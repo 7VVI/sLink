@@ -14,7 +14,6 @@ export const router = createRouter({
         { path: 'links', name: 'links', component: () => import('./views/LinksView.vue') },
         { path: 'groups', name: 'groups', component: () => import('./views/GroupsView.vue') },
         { path: 'domains', name: 'domains', component: () => import('./views/DomainsView.vue') },
-        { path: 'analytics', name: 'analytics', component: () => import('./views/AnalyticsView.vue') },
         { path: 'trash', name: 'trash', component: () => import('./views/TrashView.vue') },
         { path: 'settings', name: 'settings', component: () => import('./views/SettingsView.vue') },
       ],

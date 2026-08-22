@@ -7,6 +7,7 @@ import com.shortlink.common.dto.MoveGroupReq;
 import com.shortlink.common.dto.ShortLinkDetailVO;
 import com.shortlink.common.dto.ShortLinkVO;
 import com.shortlink.common.dto.UpdateStatusReq;
+import com.shortlink.common.dto.UpdateShortLinkReq;
 import com.shortlink.common.result.PageResult;
 import com.shortlink.common.result.Result;
 import com.shortlink.core.service.ShortLinkService;
@@ -70,6 +71,18 @@ public class ShortLinkController {
         boolean admin = SaTokenReactorContext.using(exchange,
                 () -> StpUtil.hasRole(ShortLinkConstants.ROLE_ADMIN));
         return shortLinkService.detail(code, userId, admin).map(Result::ok);
+    }
+
+    @Operation(summary = "编辑短链（目标链接/标题/分组，跳转秒级生效）")
+    @PutMapping("/{code}")
+    public Mono<Result<Void>> update(@PathVariable("code") String code,
+                                     @Valid @RequestBody UpdateShortLinkReq request,
+                                     ServerWebExchange exchange) {
+        long userId = SaTokenReactorContext.using(exchange, StpUtil::getLoginIdAsLong);
+        boolean admin = SaTokenReactorContext.using(exchange,
+                () -> StpUtil.hasRole(ShortLinkConstants.ROLE_ADMIN));
+        return shortLinkService.update(code, request, userId, admin)
+                .map(v -> Result.ok());
     }
 
     @Operation(summary = "移动短链到分组（groupId=0 移回未分组）")

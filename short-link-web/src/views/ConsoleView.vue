@@ -20,10 +20,6 @@ const sections = [
     ],
   },
   {
-    label: '洞察',
-    items: [{ id: 'analytics', label: '访问监控', icon: 'chart' }],
-  },
-  {
     label: '系统',
     items: [{ id: 'settings', label: '设置', icon: 'sliders' }],
   },
@@ -33,7 +29,6 @@ const titles = {
   links: '短链接',
   groups: '分组',
   domains: '域名管理',
-  analytics: '访问监控',
   trash: '回收站',
   settings: '设置',
 };

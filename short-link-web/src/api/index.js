@@ -54,6 +54,7 @@ export const api = {
   createLink: (data) => http.post('/short-links', data),
   pageLinks: (params) => http.get('/short-links', { params }),
   linkDetail: (code) => http.get(`/short-links/${code}`),
+  updateLink: (code, data) => http.put(`/short-links/${code}`, data),
   moveGroup: (code, groupId) => http.put(`/short-links/${code}/group`, { groupId }),
   changeStatus: (code, enabled) => http.put(`/short-links/${code}/status`, { enabled }),
   removeLink: (code) => http.delete(`/short-links/${code}`),

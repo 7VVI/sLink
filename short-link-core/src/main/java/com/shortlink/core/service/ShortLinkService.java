@@ -8,6 +8,7 @@ import com.shortlink.common.dto.CreateShortLinkReq;
 import com.shortlink.common.dto.RecycleLinkVO;
 import com.shortlink.common.dto.ShortLinkDetailVO;
 import com.shortlink.common.dto.ShortLinkVO;
+import com.shortlink.common.dto.UpdateShortLinkReq;
 import com.shortlink.common.exception.BizException;
 import com.shortlink.common.exception.ErrorCode;
 import com.shortlink.common.result.PageResult;
@@ -229,7 +230,30 @@ public class ShortLinkService {
                         .map(stats -> toDetailVO(args, stats)));
     }
 
-    // ------------------------------------------------------------------ 分组移动
+    // ------------------------------------------------------------------ 编辑与分组移动
+
+    /**
+     * 编辑短链（目标链接/标题/分组）：更新 DB 后失效跳转缓存，秒级生效；统计不受影响。
+     */
+    public Mono<Void> update(String code, UpdateShortLinkReq request, long userId, boolean admin) {
+        return Reactors.call(() -> {
+            ShortUrlDO record = requireReadable(code, userId, admin);
+            if (record.getStatus() == ShortLinkConstants.STATUS_DELETED) {
+                throw new BizException(ErrorCode.PARAM_INVALID, "回收站中的短链不支持编辑，请先还原");
+            }
+            UrlValidator.requireValid(request.longUrl(), properties.getSecurity().getBlacklistDomains());
+            Long groupId = request.groupId() == null ? record.getGroupId() : request.groupId();
+            ShortUrlDO update = new ShortUrlDO();
+            update.setId(record.getId());
+            update.setLongUrl(request.longUrl().trim());
+            update.setTitle(request.title());
+            update.setGroupId(resolveGroupId(groupId, userId));
+            update.setUpdateTime(LocalDateTime.now());
+            shortUrlMapper.updateById(update);
+            cache.evict(code);
+            return null;
+        }).then();
+    }
 
     /**
      * 移动短链到指定分组（groupId=0 表示未分组）。分组信息不参与跳转缓存，无需失效缓存。

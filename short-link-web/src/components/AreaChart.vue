@@ -1,13 +1,12 @@
 <script setup>
-// 平滑面积图：常驻 X/Y 坐标轴与刻度（纵轴数值、横轴时间）、数据点与关键数值直接可见、悬浮增强提示
-import { computed, ref } from 'vue';
+// 平滑面积图：常驻 X/Y 坐标轴与刻度（纵轴数值、横轴时间）、数据点与关键数值直接可见
+import { computed } from 'vue';
 
 const props = defineProps({
   data: { type: Array, required: true }, // [{d:'7/23', v:123}]
   height: { type: Number, default: 230 },
 });
 
-const hover = ref(null);
 const W = 720;
 const H = computed(() => props.height);
 const PAD = { t: 22, r: 14, b: 28, l: 40 };
@@ -89,31 +88,11 @@ const vLabels = computed(() => {
   idx.add(n - 1);
   return [...idx].sort((a, b) => a - b).map((i) => ({ i, x: pts.value[i].x, y: pts.value[i].y, v: props.data[i].v }));
 });
-
-const onMove = (e) => {
-  const rect = e.currentTarget.getBoundingClientRect();
-  const x = ((e.clientX - rect.left) / rect.width) * W;
-  let nearest = 0;
-  let dist = Infinity;
-  pts.value.forEach((p, i) => {
-    const dd = Math.abs(p.x - x);
-    if (dd < dist) {
-      dist = dd;
-      nearest = i;
-    }
-  });
-  hover.value = nearest;
-};
 </script>
 
 <template>
-  <div style="position:relative">
-    <svg
-      :viewBox="`0 0 ${W} ${H}`"
-      style="width:100%;height:auto;display:block"
-      @mousemove="onMove"
-      @mouseleave="hover = null"
-    >
+  <div>
+    <svg :viewBox="`0 0 ${W} ${H}`" style="width:100%;height:auto;display:block">
       <defs>
         <linearGradient id="areaFill" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stop-color="#111827" stop-opacity="0.10" />
@@ -151,7 +130,7 @@ const onMove = (e) => {
         </text>
       </g>
 
-      <!-- 常驻数据点：无需悬浮即可看到折线位置 -->
+      <!-- 常驻数据点：直接可见折线位置 -->
       <circle v-for="(p, i) in pts" :key="'pt' + i" :cx="p.x" :cy="p.y" r="2.6" fill="#111827" stroke="#fff" stroke-width="1.2" />
       <!-- 常驻数值标签 -->
       <g v-for="l in vLabels" :key="'vl' + l.i">
@@ -160,18 +139,6 @@ const onMove = (e) => {
           {{ l.v.toLocaleString() }}
         </text>
       </g>
-
-      <g v-if="hover !== null">
-        <line :x1="pts[hover].x" :x2="pts[hover].x" :y1="PAD.t - 6" :y2="H - PAD.b" stroke="#D1D5DB" />
-        <circle :cx="pts[hover].x" :cy="pts[hover].y" r="3.6" fill="#111827" stroke="#fff" stroke-width="1.6" />
-      </g>
     </svg>
-    <div
-      v-if="hover !== null"
-      class="tooltip-badge"
-      :style="{ left: `${(pts[hover].x / W) * 100}%`, top: `${(pts[hover].y / H) * 100}%` }"
-    >
-      {{ pts[hover].d.d }} · {{ pts[hover].d.v.toLocaleString() }} 次
-    </div>
   </div>
 </template>
